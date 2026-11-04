@@ -71,6 +71,7 @@ main{padding-block:24px 64px}
 @media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
 .panel+.panel{margin-top:20px}
+.grid2>.panel{margin-top:0}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 
 /* checklist */
@@ -445,7 +446,7 @@ const views = {
     const colabs = S.acceso?.colaboradoras || [];
     return `
     <div class="page-head"><div><h1 style="font-size:1.7rem">Leads</h1><p>${S.role === "revisor" ? "Todas las fichas de las colaboradoras." : "Tus fichas de clientes."}</p></div>
-      ${S.role === "colab" ? `<button class="btn primary" data-a="new">+ Nuevo lead</button>` : ""}</div>
+      <button class="btn primary" data-a="new">+ Nuevo lead</button></div>
     <div class="toolbar"><input type="search" id="q" placeholder="Buscar por nombre, teléfono o zona" value="${esc(S.q)}">
       ${S.role === "revisor" ? `<select id="colab" class="btn"><option value="todas">Todas las colaboradoras</option>${colabs.map(c => `<option value="${esc(c)}" ${S.colab===c?"selected":""}>${esc(nombreDe(c))}</option>`).join("")}</select>` : ""}</div>
     <div class="filters">${Object.entries(FILTROS).map(([k,f]) => `<button data-filtro="${k}" aria-pressed="${S.filtro===k}">${f.t} <span class="mono">${contar(k)}</span></button>`).join("")}</div>
@@ -581,6 +582,7 @@ function drawerNew() {
     <div class="field full"><label for="n-nombre">Nombre del cliente</label><input id="n-nombre" name="nombre" required placeholder="Como aparece en el CRM"></div>
     <div class="field"><label for="n-tel">Teléfono</label><input id="n-tel" name="telefono" required placeholder="+34 600 000 000"></div>
     <div class="field"><label for="n-zonas">Zona o ciudad (si ya la sabes)</label><input id="n-zonas" name="zonas"></div>
+    ${S.role === "revisor" ? `<div class="field full"><label for="n-owner">Asignar a</label><select id="n-owner" name="owner" required>${(S.acceso?.colaboradoras || []).map(c => `<option value="${esc(c)}">${esc(nombreDe(c))}</option>`).join("")}</select></div>` : ""}
     <div class="full"><button class="btn primary">Crear ficha</button></div>
   </form><p class="small muted">Crea la ficha cuando cojas el lead del CRM. El resto de datos los completarás en la videollamada.</p></div>`;
 }
@@ -724,7 +726,7 @@ document.addEventListener("submit", e => {
   e.preventDefault();
   const f = e.target, kind = f.dataset.form, fd = Object.fromEntries(new FormData(f));
   if (kind === "new") {
-    const l = {id:uid(), ownerEmail:S.email, nombre:fd.nombre.trim(), telefono:fd.telefono.trim(), zonas:(fd.zonas||"").trim(), maxFinanciar:"", habitaciones:"", extras:[], otros:"", notas:"",
+    const l = {id:uid(), ownerEmail:(S.role === "revisor" && fd.owner) ? fd.owner : S.email, nombre:fd.nombre.trim(), telefono:fd.telefono.trim(), zonas:(fd.zonas||"").trim(), maxFinanciar:"", habitaciones:"", extras:[], otros:"", notas:"",
       fase:"nuevo", ultimaRespuesta:hoy(), reactivacion:null, ultimatum:null, llamada:null, enlaces:[], comisiones:{}, creado:new Date().toISOString()};
     saveLead(l, "Ficha creada"); openLead(l.id, "llamada"); render();
   } else if (kind === "link") {
