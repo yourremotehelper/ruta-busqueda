@@ -482,7 +482,7 @@ const views = {
     <div class="grid2">
       <section class="panel">
         <div class="panel-head"><h2>Comisiones (25 € por vivienda)</h2></div>
-        <p class="small muted" style="margin-top:-6px">Aparecen las viviendas marcadas como «Quiere reservar». Valida solo cuando el cliente haya firmado el documento de reserva o arras.</p>
+        <p class="small muted" style="margin-top:-6px">Aparecen las viviendas marcadas como «Quiere reservar». Valídalas cuando la reserva esté hecha.</p>
         ${reservas.length ? reservas.map(({l,e}) => { const c = l.comisiones?.[e.id]; return `
           <div class="link-item"><div class="link-top"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(portal(e.url))} · ${esc(l.nombre)}</a>
             ${c ? `<span class="chip ${c.estado==="pagada"?"ok":c.estado==="validada"?"acc":"bad"}">${{validada:"Validada",pagada:"Pagada",rechazada:"No cuenta"}[c.estado]}</span>` : `<span class="chip warn">Por validar</span>`}</div>
@@ -544,12 +544,7 @@ const views = {
         <li>Muestra rechazo abiertamente y no se puede reconducir.</li>
         <li>No responde en 24 h después del mensaje de ultimátum.</li>
       </ul><p><b>Usa siempre el criterio: cada lead cuesta dinero.</b> Antes de eliminar, lee el historial por si hay forma de retomarlo. La opción «Descalificar» del CRM no la usas tú.</p></section>
-      <section><h3>Comisión de 25 € por vivienda</h3><p>Cuenta cuando se cumplen las cuatro condiciones:</p><ol>
-        <li>La vivienda la has encontrado y enviado tú (y está apuntada en «Enlaces»).</li>
-        <li>Encaja razonablemente con lo que busca el cliente.</li>
-        <li>El cliente quiere reservarla de verdad.</li>
-        <li>Firma el documento de reserva o arras.</li>
-      </ol><p>Enviar un enlace o que el cliente vaya a verla no basta. Albert o Paula validan la comisión cuando hay firma.</p></section>
+      <section><h3>Comisión de 25 € por vivienda</h3><p>Cobras 25 € por cada vivienda reservada que hayas encontrado tú. Apunta siempre los enlaces en la ficha para que conste.</p></section>
       <section><h3>Dónde buscar</h3><p>Principalmente <b>Idealista</b> y <b>Vox Houses</b>, y cualquier otro portal que te funcione. Guarda alertas con los filtros de cada cliente para no repetir búsquedas.</p></section>
       <section><h3>Horario de referencia</h3><p>De 11:00 a 14:00 y a partir de las 18:00 (hora peninsular española). Son las franjas en las que los clientes suelen estar disponibles.</p></section>
       <section><h3>Confidencialidad</h3><ul>
