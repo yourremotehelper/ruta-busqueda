@@ -241,7 +241,7 @@ function seguimiento(l) {
   const base = l.ultimaRespuesta || (l.creado || "").slice(0,10) || hoy();
   if (l.ultimatum) {
     const h = (Date.now() - Date.parse(l.ultimatum)) / 36e5;
-    if (h >= 24) return {k:"eliminar", c:"bad", t:"24 h sin responder al ultimátum", a:"Lee el historial en Spoki por si se puede reconducir. Si no, elimínalo del CRM y cierra la ficha."};
+    if (h >= 24) return {k:"eliminar", c:"bad", t:"24 h sin responder al ultimátum", a:"Lee el historial de la conversación por si se puede reconducir. Si no, elimínalo del CRM y cierra la ficha."};
     return {k:"espera", c:"", t:`Ultimátum enviado · quedan ${Math.max(1, Math.ceil(24 - h))} h`};
   }
   const d = daysBetween(base, hoy());
@@ -255,7 +255,7 @@ const llamadaHoy = l => l.llamada && l.llamada.fecha === hoy() && l.fase !== "ce
 const activos = L => L.filter(l => l.fase !== "cerrado");
 
 const ITEMS = [
-  {k:"chats", t:"Revisar los chats de Spoki del día anterior", d:"Si un cliente ha contestado, abre su ficha y pulsa «Ha respondido»."},
+  {k:"chats", t:"Revisar los chats de clientes del día anterior", d:"Si un cliente ha contestado, abre su ficha y pulsa «Ha respondido»."},
   {k:"crm", t:"Revisar en el CRM el estado de tus leads", d:"Comprueba que cada lead está en la columna correcta."},
   {k:"reactivar", t:"Enviar mensajes de reactivación", d:"A quien lleva 2 días sin responder.", f:"reactivar"},
   {k:"ultimatum", t:"Enviar los ultimátums", d:"A quien lleva 4 días sin responder.", f:"ultimatum"},
@@ -526,9 +526,9 @@ const views = {
       <section><h3>Tu trabajo en una frase</h3><p>Encontrar viviendas en venta que encajen de verdad con lo que busca cada cliente, enviárselas y acompañarle hasta que quiera reservar una. En ese momento le pasas a Albert o a Paula.</p></section>
       <section><h3>El circuito de un lead</h3><ol>
         <li><b>Coges el lead del CRM</b> (columna «Buscando Vivienda») y creas su ficha aquí con «+ Nuevo lead».</li>
-        <li><b>Agendas una videollamada</b> por Spoki y la apuntas en la pestaña «Videollamada» de la ficha.</li>
+        <li><b>Agendas una videollamada</b> con el cliente y la apuntas en la pestaña «Videollamada» de la ficha.</li>
         <li><b>En la videollamada</b> sigues el guion y rellenas zonas, máximo a financiar, habitaciones y características.</li>
-        <li><b>Buscas y envías enlaces</b> por Spoki (solo el enlace). Cada enlace lo apuntas en la pestaña «Enlaces».</li>
+        <li><b>Buscas y envías enlaces</b> al cliente por mensaje (solo el enlace). Cada enlace lo apuntas en la pestaña «Enlaces».</li>
         <li><b>El cliente llama al anunciante y va solo a verla.</b> Después le preguntas qué le ha parecido y actualizas el estado del enlace.</li>
         <li><b>Si quiere reservar</b>, marcas el enlace como «Quiere reservar» y avisas a Albert o a Paula. Ellos siguen desde ahí.</li>
       </ol></section>
@@ -554,7 +554,7 @@ const views = {
       <section><h3>Horario de referencia</h3><p>De 11:00 a 14:00 y a partir de las 18:00 (hora peninsular española). Son las franjas en las que los clientes suelen estar disponibles.</p></section>
       <section><h3>Confidencialidad</h3><ul>
         <li>Los datos de los clientes (teléfono, presupuesto, situación) solo se usan para buscarles vivienda.</li>
-        <li>No los compartas fuera de Spoki, el CRM y esta herramienta. Nada de capturas a terceros.</li>
+        <li>No los compartas fuera de la plataforma de mensajería, el CRM y esta herramienta. Nada de capturas a terceros.</li>
         <li>No guardes datos de clientes en tu móvil o en documentos personales.</li>
       </ul></section>
     </div>`;
