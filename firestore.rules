@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function email() { return request.auth.token.email.lower(); }
+    function accPath() { return /databases/$(database)/documents/config/acceso; }
+    function esAdmin() { return signedIn() && email() == 'your.remote.helper@gmail.com'; }
+    function esRevisor() { return esAdmin() || (signedIn() && exists(accPath()) && email() in get(accPath()).data.revisores); }
+    function esColab() { return signedIn() && exists(accPath()) && email() in get(accPath()).data.colaboradoras; }
+
+    match /config/acceso {
+      allow read: if esRevisor() || esColab();
+      allow write: if esRevisor();
+    }
+
+    match /leads/{id} {
+      allow read: if esRevisor() || (esColab() && resource.data.ownerEmail == email());
+      allow create: if esRevisor()
+        || (esColab() && request.resource.data.ownerEmail == email()
+            && request.resource.data.get('comisiones', {}).size() == 0);
+      allow update: if esRevisor()
+        || (esColab() && resource.data.ownerEmail == email()
+            && request.resource.data.ownerEmail == email()
+            && request.resource.data.get('comisiones', {}) == resource.data.get('comisiones', {}));
+      allow delete: if esRevisor();
+    }
+
+    match /usuarios/{u}/checklists/{fecha} {
+      allow read: if esRevisor() || (esColab() && u == email());
+      allow write: if esColab() && u == email() && request.resource.data.ownerEmail == email();
+    }
+  }
+}
