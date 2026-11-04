@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ruta de Búsqueda · Tu Hogar Posible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra superior con pestañas; contenido en dos columnas (tareas | avisos) que se apilan en móvil; ficha de lead en panel lateral */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunken:#E9EDF3; --ink:#18202C; --muted:#5A6577; --line:#D7DDE6;
+  --accent:#2747C9; --accent-ink:#FFFFFF; --accent-soft:#E3E8FB;
+  --ok:#1F7A52; --ok-soft:#DDF3E8; --warn:#9A5B00; --warn-soft:#FBEFD9; --bad:#B9312A; --bad-soft:#FBE3E1;
+  --shadow:0 1px 2px rgba(24,32,44,.06),0 8px 24px rgba(24,32,44,.06);
+  --f-display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#10151D; --surface:#171E29; --sunken:#0C1118; --ink:#E7ECF3; --muted:#98A3B5; --line:#2A3442;
+  --accent:#8199FF; --accent-ink:#0C1118; --accent-soft:#1D2847;
+  --ok:#4CC38A; --ok-soft:#12301F; --warn:#E8A84A; --warn-soft:#33260F; --bad:#F0776F; --bad-soft:#3A1716;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h2{font-size:1.25rem}
+h3{font-size:1.02rem}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.86em}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+/* barra superior */
+header.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:16px;padding-block:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display);font-size:1.12rem;display:block;line-height:1.1}
+.brand span{font-size:.75rem;color:var(--muted)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto}
+nav.tabs a{padding:8px 14px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:600;white-space:nowrap}
+nav.tabs a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.who{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)}
+
+/* botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink);font-size:.9rem}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:5px 10px;font-size:.82rem}
+.btn:disabled{opacity:.5;cursor:default}
+
+main{padding-block:24px 64px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head p{margin:4px 0 0;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.panel+.panel{margin-top:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+
+/* checklist */
+.progress{height:8px;background:var(--sunken);border-radius:99px;overflow:hidden;margin:6px 0 16px}
+.progress i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.check{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:11px 0;border-top:1px solid var(--line)}
+.check:first-of-type{border-top:0}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ok);cursor:pointer}
+.check label{cursor:pointer;font-weight:600}
+.check p{margin:2px 0 0;font-size:.85rem;color:var(--muted);font-weight:400}
+.check.done label{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+
+/* chips y pills */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:.76rem;font-weight:700;white-space:nowrap;border:0;cursor:default;background:var(--sunken);color:var(--muted)}
+button.chip{cursor:pointer}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.acc{background:var(--accent-soft);color:var(--accent)}
+
+/* listas de leads */
+.alert-group{margin-top:14px}
+.alert-group:first-child{margin-top:0}
+.row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;width:100%;text-align:left}
+.row+.row{margin-top:6px}
+.row:hover{border-color:var(--accent)}
+.row .grow{flex:1;min-width:0}
+.row b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sub{font-size:.82rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stripe{width:4px;align-self:stretch;border-radius:4px;background:var(--line);flex:none}
+.stripe.bad{background:var(--bad)} .stripe.warn{background:var(--warn)} .stripe.ok{background:var(--ok)} .stripe.acc{background:var(--accent)}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:.9rem;border:1px dashed var(--line);border-radius:8px}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input[type=search]{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filters button{border:1px solid var(--line);background:var(--surface);padding:5px 12px;border-radius:999px;font-size:.84rem;font-weight:600;cursor:pointer;color:var(--muted)}
+.filters button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+table.leads{width:100%;border-collapse:collapse;font-size:.9rem}
+table.leads th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.leads td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.leads tr.click{cursor:pointer}
+table.leads tr.click:hover td{background:var(--sunken)}
+.tscroll{overflow-x:auto}
+@media (max-width:700px){ .hide-sm{display:none} }
+
+/* panel lateral */
+.scrim{position:fixed;inset:0;background:rgba(10,14,20,.45);z-index:40}
+aside.drawer{position:fixed;top:0;right:0;bottom:0;width:min(600px,100%);background:var(--bg);z-index:41;display:flex;flex-direction:column;box-shadow:var(--shadow);padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px)}
+.d-head{background:var(--surface);border-bottom:1px solid var(--line);padding:16px 18px 0}
+.d-title{display:flex;align-items:flex-start;gap:10px}
+.d-title h2{flex:1;min-width:0;font-size:1.4rem}
+.d-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px;font-size:.88rem}
+.d-tabs{display:flex;gap:2px;overflow-x:auto}
+.d-tabs button{border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.d-tabs button[aria-selected="true"]{color:var(--accent);border-color:var(--accent)}
+.d-body{flex:1;overflow-y:auto;padding:18px 18px calc(32px + env(safe-area-inset-bottom,0px))}
+.follow{border-radius:var(--r);padding:14px;margin-bottom:16px;border:1px solid var(--line);background:var(--surface)}
+.follow.bad{background:var(--bad-soft);border-color:transparent}
+.follow.warn{background:var(--warn-soft);border-color:transparent}
+.follow .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.form .full{grid-column:1/-1}
+@media (max-width:520px){.form{grid-template-columns:minmax(0,1fr)}}
+.field label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.field textarea{min-height:84px;resize:vertical}
+.extras{display:flex;flex-wrap:wrap;gap:6px}
+.extras label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:.85rem;cursor:pointer;background:var(--surface);font-weight:500;color:var(--ink);margin:0}
+.extras input{accent-color:var(--accent);margin:0}
+
+.link-item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.link-item+.link-item{margin-top:8px}
+.link-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.link-top a{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.link-item select{padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:.84rem}
+.addlink{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:14px}
+.addlink input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+
+.script-step{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.script-step:first-child{border-top:0;padding-top:0}
+.step-n{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-family:var(--f-display)}
+.say{background:var(--sunken);border-radius:8px;padding:10px 12px;margin:8px 0 0;font-size:.92rem}
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.85rem;font-weight:600;cursor:pointer}
+.toggle input{accent-color:var(--ok);margin:0}
+
+.confirm{border:1px solid var(--bad);background:var(--bad-soft);border-radius:var(--r);padding:14px;margin-top:12px}
+
+/* revisión */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.tile b{display:block;font-family:var(--f-display);font-size:1.7rem;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+.heat{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}
+.heat div{aspect-ratio:1;border-radius:4px;background:var(--sunken);display:grid;place-items:center;font-size:.62rem;color:var(--muted);max-width:100%}
+.heat .h1{background:var(--warn-soft);color:var(--warn)} .heat .h2{background:var(--ok-soft);color:var(--ok)} .heat .h3{background:var(--ok);color:var(--surface)}
+
+/* ayuda */
+.help{max-width:72ch}
+.help section{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.help section+section{margin-top:14px}
+.help h3{margin-bottom:6px}
+.help ul,.help ol{margin:6px 0;padding-left:20px}
+.help li{margin:4px 0}
+.help p{margin:6px 0}
+
+.center-card{max-width:440px;margin:12vh auto 0;text-align:center}
+.center-card .panel{padding:28px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;z-index:60;font-size:.9rem;box-shadow:var(--shadow)}
+.acc-list{display:flex;flex-direction:column;gap:6px;margin:8px 0 12px}
+.acc-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.acc-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.inline-form{display:flex;gap:8px;flex-wrap:wrap}
+.inline-form input,.inline-form select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);flex:1;min-width:160px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script type="module">
+/* ============ CONFIGURACIÓN ============ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBb4NliIiygS6yBk3EC-_ZYrIvDiIAGUyQ",
+  authDomain: "ruta-busqueda-thp.firebaseapp.com",
+  projectId: "ruta-busqueda-thp",
+  storageBucket: "ruta-busqueda-thp.firebasestorage.app",
+  messagingSenderId: "1045666038074",
+  appId: "1:1045666038074:web:306e3c3ed84c068734d003"
+};
+const ADMIN_EMAIL = "your.remote.helper@gmail.com";     // cuenta de Paula: siempre tiene acceso de revisión
+const FB_V = "10.12.2";
+
+/* ============ UTILIDADES ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2, "0");
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hoy = () => isoDate(new Date());
+const addDays = (iso, n) => { const [y,m,d] = iso.split("-").map(Number); return isoDate(new Date(y, m-1, d+n)); };
+const daysBetween = (a, b) => { const [y1,m1,d1]=a.split("-").map(Number), [y2,m2,d2]=b.split("-").map(Number); return Math.round((Date.UTC(y2,m2-1,d2)-Date.UTC(y1,m1-1,d1))/864e5); };
+const fmtFecha = iso => { if(!iso) return ""; const [y,m,d] = iso.slice(0,10).split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("es-ES",{day:"numeric",month:"short"}); };
+const fmtLargo = iso => { const [y,m,d] = iso.split("-").map(Number); const s = new Date(y,m-1,d).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"}); return s[0].toUpperCase()+s.slice(1); };
+const eur = n => (n || n === 0) && n !== "" ? Number(n).toLocaleString("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0}) : "—";
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const portal = url => { try { const h = new URL(url).hostname.replace(/^www\./,""); if (h.includes("idealista")) return "Idealista"; if (h.includes("vox")) return "Vox Houses"; if (h.includes("fotocasa")) return "Fotocasa"; if (h.includes("habitaclia")) return "Habitaclia"; return h; } catch { return "Enlace"; } };
+let toastT; const toast = msg => { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2200); };
+
+const FASES = {
+  nuevo:       {t:"Nuevo",                 c:"",     s:""},
+  videollamada:{t:"Videollamada agendada", c:"acc",  s:"acc"},
+  buscando:    {t:"Buscando vivienda",     c:"ok",   s:"ok"},
+  reserva:     {t:"Quiere reservar",       c:"warn", s:"warn"},
+  cerrado:     {t:"Cerrado",               c:"",     s:""}
+};
+const EXTRAS = ["Ascensor","Garaje","Terraza","Balcón","Trastero","Exterior","Planta baja","Piscina","Aire acondicionado","Calefacción","Amueblado","Cerca de transporte"];
+const ESTADOS_ENLACE = {enviado:"Enviado", interesa:"Le interesa", visitada:"Ha ido a verla", descartada:"Descartada", reserva:"Quiere reservar"};
+const MOTIVOS = {sin_respuesta:"Eliminado del CRM: sin respuesta", rechazo:"Eliminado del CRM: rechazo", reserva:"Pasado a Albert/Paula para reservar", otro:"Otro motivo"};
+
+/* ============ SEGUIMIENTO ============ */
+function seguimiento(l) {
+  if (l.fase === "reserva" || l.fase === "cerrado") return null;
+  const base = l.ultimaRespuesta || (l.creado || "").slice(0,10) || hoy();
+  if (l.ultimatum) {
+    const h = (Date.now() - Date.parse(l.ultimatum)) / 36e5;
+    if (h >= 24) return {k:"eliminar", c:"bad", t:"24 h sin responder al ultimátum", a:"Lee el historial en Spoki por si se puede reconducir. Si no, elimínalo del CRM y cierra la ficha."};
+    return {k:"espera", c:"", t:`Ultimátum enviado · quedan ${Math.max(1, Math.ceil(24 - h))} h`};
+  }
+  const d = daysBetween(base, hoy());
+  const reactivado = l.reactivacion && l.reactivacion >= base;
+  if (d >= 4) return {k:"ultimatum", c:"bad", t:`${d} días sin responder`, a:"Toca enviar el mensaje de ultimátum."};
+  if (d >= 2 && !reactivado) return {k:"reactivar", c:"warn", t:`${d} días sin responder`, a:"Toca enviar un mensaje de reactivación."};
+  if (reactivado) return {k:"espera", c:"", t:"Reactivación enviada, esperando respuesta"};
+  return {k:"ok", c:"ok", t: d <= 0 ? "Respondió hoy" : d === 1 ? "Respondió ayer" : `Respondió hace ${d} días`};
+}
+const llamadaHoy = l => l.llamada && l.llamada.fecha === hoy() && l.fase !== "cerrado";
+const activos = L => L.filter(l => l.fase !== "cerrado");
+
+const ITEMS = [
+  {k:"chats", t:"Revisar los chats de Spoki del día anterior", d:"Si un cliente ha contestado, abre su ficha y pulsa «Ha respondido»."},
+  {k:"crm", t:"Revisar en el CRM el estado de tus leads", d:"Comprueba que cada lead está en la columna correcta."},
+  {k:"reactivar", t:"Enviar mensajes de reactivación", d:"A quien lleva 2 días sin responder.", f:"reactivar"},
+  {k:"ultimatum", t:"Enviar los ultimátums", d:"A quien lleva 4 días sin responder.", f:"ultimatum"},
+  {k:"eliminar", t:"Revisar y eliminar leads sin respuesta al ultimátum", d:"Lee antes el historial por si se puede reconducir. Cada lead cuesta dinero.", f:"eliminar"},
+  {k:"agendar", t:"Agendar videollamadas", d:"Con los leads nuevos que aún no tienen fecha.", f:"agendar"},
+  {k:"recordatorios", t:"Enviar recordatorios y confirmaciones de las llamadas de hoy", f:"recordar"},
+  {k:"llamadas", t:"Hacer las videollamadas de hoy y rellenar la ficha", f:"llamar"},
+  {k:"buscar", t:"Buscar viviendas y enviar enlaces", d:"Para los leads en búsqueda. Apunta cada enlace en su ficha.", f:"buscando"}
+];
+const FILTROS = {
+  activos:  {t:"Activos",        fn: l => l.fase !== "cerrado"},
+  reactivar:{t:"Reactivar",      fn: l => seguimiento(l)?.k === "reactivar"},
+  ultimatum:{t:"Ultimátum",      fn: l => seguimiento(l)?.k === "ultimatum"},
+  eliminar: {t:"Revisar y eliminar", fn: l => seguimiento(l)?.k === "eliminar"},
+  agendar:  {t:"Sin videollamada", fn: l => l.fase === "nuevo" && !l.llamada?.fecha},
+  recordar: {t:"Recordatorio pendiente", fn: l => llamadaHoy(l) && !l.llamada.recordatorio},
+  llamar:   {t:"Llamadas de hoy", fn: l => llamadaHoy(l) && !l.llamada.realizada},
+  buscando: {t:"Buscando",       fn: l => l.fase === "buscando"},
+  reserva:  {t:"Quieren reservar", fn: l => l.fase === "reserva"},
+  cerrados: {t:"Cerrados",       fn: l => l.fase === "cerrado"},
+  todos:    {t:"Todos",          fn: () => true}
+};
+const contar = f => S.leads.filter(FILTROS[f].fn).length;
+
+/* ============ ESTADO ============ */
+const S = {
+  ready:false, user:null, email:"", nombre:"", role:null, acceso:null,
+  leads:[], hechos:{}, checklists:{}, view:"hoy", filtro:"activos", q:"", colab:"todas",
+  open:null, tab:"ficha", closing:false, error:""
+};
+let fb = null, unsub = [];
+
+/* ============ FIREBASE ============ */
+async function initFirebase() {
+  const base = `https://www.gstatic.com/firebasejs/${FB_V}/`;
+  const [A, AU, F] = await Promise.all([import(base+"firebase-app.js"), import(base+"firebase-auth.js"), import(base+"firebase-firestore.js")]);
+  const app = A.initializeApp(FIREBASE_CONFIG);
+  const auth = AU.getAuth(app), db = F.getFirestore(app);
+  fb = {AU, F, auth, db};
+  AU.onAuthStateChanged(auth, onUser);
+}
+async function login() { try { await fb.AU.signInWithPopup(fb.auth, new fb.AU.GoogleAuthProvider()); } catch (e) { S.error = "No se ha podido iniciar sesión. Inténtalo de nuevo."; render(); } }
+function logout() { fb.AU.signOut(fb.auth); }
+
+async function onUser(u) {
+  unsub.forEach(f => f()); unsub = [];
+  S.user = u; S.ready = true; S.role = null; S.leads = []; S.error = "";
+  if (!u) return render();
+  S.email = (u.email || "").toLowerCase(); S.nombre = u.displayName || S.email;
+  const {F, db} = fb;
+  let acc = null;
+  try { const snap = await F.getDoc(F.doc(db, "config", "acceso")); acc = snap.exists() ? snap.data() : null; } catch (e) { acc = null; }
+  S.acceso = acc || {revisores:[], colaboradoras:[], nombres:{}};
+  if (S.email === ADMIN_EMAIL.toLowerCase() || (acc?.revisores || []).includes(S.email)) S.role = "revisor";
+  else if ((acc?.colaboradoras || []).includes(S.email)) S.role = "colab";
+  if (!S.role) return render();
+  if (S.role === "revisor") S.view = location.hash.slice(1) || "revision";
+  subscribe();
+  render();
+}
+
+function subscribe() {
+  const {F, db} = fb;
+  const col = F.collection(db, "leads");
+  const q = S.role === "revisor" ? col : F.query(col, F.where("ownerEmail", "==", S.email));
+  unsub.push(F.onSnapshot(q, s => { S.leads = s.docs.map(d => ({id:d.id, ...d.data()})); refresh(); }, e => { S.error = "No se pueden leer los leads: " + e.message; render(); }));
+  if (S.role === "colab") {
+    unsub.push(F.onSnapshot(F.doc(db, "usuarios", S.email, "checklists", hoy()), s => { S.hechos = s.exists() ? (s.data().hechos || {}) : {}; refresh(); }));
+  } else {
+    unsub.push(F.onSnapshot(F.doc(db, "config", "acceso"), s => { S.acceso = s.exists() ? s.data() : {revisores:[], colaboradoras:[], nombres:{}}; loadChecklists(); refresh(); }));
+  }
+}
+async function loadChecklists() {
+  const {F, db} = fb; const desde = addDays(hoy(), -13);
+  for (const em of (S.acceso?.colaboradoras || [])) {
+    try {
+      const s = await F.getDocs(F.query(F.collection(db, "usuarios", em, "checklists"), F.where("fecha", ">=", desde)));
+      S.checklists[em] = {}; s.forEach(d => S.checklists[em][d.id] = d.data().hechos || {});
+    } catch (e) { S.checklists[em] = {}; }
+  }
+  refresh();
+}
+
+/* ============ GUARDADO ============ */
+function saveLead(l, msg) {
+  l.actualizado = new Date().toISOString();
+  const i = S.leads.findIndex(x => x.id === l.id);
+  if (i >= 0) S.leads[i] = l; else S.leads.push(l);
+  const {id, ...data} = l;
+  fb.F.setDoc(fb.F.doc(fb.db, "leads", id), data).then(() => msg && toast(msg)).catch(e => toast("No se ha guardado: " + e.message));
+}
+function setHecho(k, v) {
+  S.hechos = {...S.hechos, [k]: v};
+  fb.F.setDoc(fb.F.doc(fb.db, "usuarios", S.email, "checklists", hoy()), {ownerEmail:S.email, fecha:hoy(), hechos:S.hechos}).catch(e => toast("No se ha guardado: " + e.message));
+  render();
+}
+function setComision(l, eid, val) {
+  l.comisiones = {...(l.comisiones || {}), [eid]: val};
+  fb.F.updateDoc(fb.F.doc(fb.db, "leads", l.id), {["comisiones." + eid]: val}).then(() => toast("Comisión actualizada")).catch(e => toast("No se ha guardado: " + e.message));
+  render();
+}
+function saveAcceso(a, msg) {
+  S.acceso = a;
+  fb.F.setDoc(fb.F.doc(fb.db, "config", "acceso"), a).then(() => { toast(msg); loadChecklists(); }).catch(e => toast("No se ha guardado: " + e.message));
+  render();
+}
+const lead = id => S.leads.find(l => l.id === id);
+const nombreDe = em => S.acceso?.nombres?.[em] || em;
+
+/* ============ RENDER ============ */
+function refresh() {
+  render();
+  const ae = document.activeElement;
+  if (S.open && !(ae && $("#drawer")?.contains(ae) && /INPUT|TEXTAREA|SELECT/.test(ae.tagName))) renderDrawer();
+}
+function render() {
+  const app = $("#app");
+  if (!FIREBASE_CONFIG) { app.innerHTML = card("Falta conectar Firebase", "Añade la configuración del proyecto en el archivo index.html."); return; }
+  if (!S.ready) { app.innerHTML = card("Cargando…", ""); return; }
+  if (!S.user) {
+    app.innerHTML = `<div class="wrap center-card"><div class="panel">${logo(44)}<h1 style="margin:12px 0 6px;font-size:1.6rem">Ruta de Búsqueda</h1>
+      <p class="muted" style="margin:0 0 20px">Tu Hogar Posible · tareas del día, fichas de clientes y seguimiento</p>
+      <button class="btn primary" data-a="login">Entrar con Google</button>${S.error ? `<p class="small" style="color:var(--bad)">${esc(S.error)}</p>` : ""}</div></div>`;
+    return;
+  }
+  if (!S.role) {
+    app.innerHTML = card("Tu cuenta aún no tiene acceso", `Has entrado como <b>${esc(S.email)}</b>. Pide a Paula o a Albert que te den acceso y vuelve a cargar la página.<br><br><button class="btn" data-a="logout">Salir</button>`);
+    return;
+  }
+  const tabs = S.role === "revisor" ? [["revision","Revisión"],["leads","Leads"],["accesos","Accesos"],["ayuda","Ayuda"]] : [["hoy","Hoy"],["leads","Leads"],["ayuda","Ayuda"]];
+  if (!tabs.some(t => t[0] === S.view)) S.view = tabs[0][0];
+  app.innerHTML = `
+  <header class="top"><div class="wrap top-row">
+    <div class="brand">${logo(30)}<div><b>Ruta de Búsqueda</b><span>Tu Hogar Posible</span></div></div>
+    <nav class="tabs">${tabs.map(([k,t]) => `<a href="#${k}" ${S.view===k?'aria-current="page"':""}>${t}</a>`).join("")}</nav>
+    <div class="who"><span class="hide-sm">${esc(S.nombre)}</span><button class="btn ghost sm" data-a="logout">Salir</button></div>
+  </div></header>
+  <main class="wrap">${S.error ? `<div class="follow bad">${esc(S.error)}</div>` : ""}${views[S.view]()}</main>`;
+}
+const card = (t, b) => `<div class="wrap center-card"><div class="panel">${logo(40)}<h2 style="margin:12px 0 8px">${t}</h2><p class="muted">${b}</p></div></div>`;
+const logo = s => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><path d="M8 15.5 16 9l8 6.5V24h-5.5v-5h-5v5H8z" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linejoin="round"/></svg>`;
+
+const views = {
+  hoy() {
+    const done = ITEMS.filter(i => S.hechos[i.k]).length, pct = Math.round(done / ITEMS.length * 100);
+    const groups = [["eliminar","Revisar y eliminar"],["ultimatum","Enviar ultimátum"],["reactivar","Enviar reactivación"]];
+    const calls = S.leads.filter(llamadaHoy).sort((a,b) => (a.llamada.hora||"").localeCompare(b.llamada.hora||""));
+    const alerts = groups.map(([f,t]) => { const L = S.leads.filter(FILTROS[f].fn); return L.length ? `<div class="alert-group"><div class="label" style="margin-bottom:6px">${t} · ${L.length}</div>${L.map(rowLead).join("")}</div>` : ""; }).join("");
+    return `
+    <div class="page-head"><div><h1 style="font-size:1.7rem">${fmtLargo(hoy())}</h1><p>Hola, ${esc(S.nombre.split(" ")[0])}. Esta es tu ruta de hoy.</p></div>
+      <button class="btn primary" data-a="new">+ Nuevo lead</button></div>
+    <div class="grid2">
+      <section class="panel">
+        <div class="panel-head"><h2>Checklist del día</h2><span class="mono muted">${done}/${ITEMS.length}</span></div>
+        <div class="progress"><i style="width:${pct}%"></i></div>
+        ${ITEMS.map(i => { const n = i.f ? contar(i.f) : null; return `
+          <div class="check ${S.hechos[i.k] ? "done" : ""}">
+            <input type="checkbox" id="ck-${i.k}" data-ck="${i.k}" ${S.hechos[i.k] ? "checked" : ""}>
+            <label for="ck-${i.k}">${i.t}${i.d ? `<p>${i.d}</p>` : ""}</label>
+            ${n !== null ? `<button class="chip ${n ? (i.k==="eliminar"||i.k==="ultimatum" ? "bad" : "acc") : ""}" data-filtro="${i.f}">${n}</button>` : "<span></span>"}
+          </div>`; }).join("")}
+        ${pct === 100 ? `<div class="follow" style="margin:14px 0 0;background:var(--ok-soft);border-color:transparent;color:var(--ok);font-weight:600">Has completado la ruta de hoy.</div>` : ""}
+      </section>
+      <div>
+        <section class="panel">
+          <div class="panel-head"><h2>Videollamadas de hoy</h2><span class="mono muted">${calls.length}</span></div>
+          ${calls.length ? calls.map(l => `
+            <div class="row" data-open="${l.id}"><span class="stripe ${l.llamada.realizada ? "ok" : "acc"}"></span>
+              <span class="mono" style="min-width:44px">${esc(l.llamada.hora || "--:--")}</span>
+              <span class="grow"><b>${esc(l.nombre)}</b><span class="sub">${l.llamada.realizada ? "Realizada" : l.llamada.confirmada ? "Confirmada" : l.llamada.recordatorio ? "Recordatorio enviado" : "Falta enviar recordatorio"}</span></span>
+              ${l.llamada.realizada ? `<span class="chip ok">Hecha</span>` : l.llamada.confirmada ? `<span class="chip acc">Confirmada</span>` : `<span class="chip warn">Pendiente</span>`}
+            </div>`).join("") : `<div class="empty">No tienes videollamadas para hoy.</div>`}
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Seguimiento</h2></div>
+          ${alerts || `<div class="empty">Ningún lead necesita mensaje hoy.</div>`}
+        </section>
+      </div>
+    </div>`;
+  },
+
+  leads() {
+    const q = S.q.trim().toLowerCase();
+    let L = S.leads.filter(FILTROS[S.filtro].fn);
+    if (S.role === "revisor" && S.colab !== "todas") L = L.filter(l => l.ownerEmail === S.colab);
+    if (q) L = L.filter(l => [l.nombre, l.telefono, l.zonas].join(" ").toLowerCase().includes(q));
+    L.sort((a,b) => (b.actualizado||"").localeCompare(a.actualizado||""));
+    const colabs = S.acceso?.colaboradoras || [];
+    return `
+    <div class="page-head"><div><h1 style="font-size:1.7rem">Leads</h1><p>${S.role === "revisor" ? "Todas las fichas de las colaboradoras." : "Tus fichas de clientes."}</p></div>
+      ${S.role === "colab" ? `<button class="btn primary" data-a="new">+ Nuevo lead</button>` : ""}</div>
+    <div class="toolbar"><input type="search" id="q" placeholder="Buscar por nombre, teléfono o zona" value="${esc(S.q)}">
+      ${S.role === "revisor" ? `<select id="colab" class="btn"><option value="todas">Todas las colaboradoras</option>${colabs.map(c => `<option value="${esc(c)}" ${S.colab===c?"selected":""}>${esc(nombreDe(c))}</option>`).join("")}</select>` : ""}</div>
+    <div class="filters">${Object.entries(FILTROS).map(([k,f]) => `<button data-filtro="${k}" aria-pressed="${S.filtro===k}">${f.t} <span class="mono">${contar(k)}</span></button>`).join("")}</div>
+    ${L.length ? `<div class="panel" style="padding:0"><div class="tscroll"><table class="leads"><thead><tr>
+      <th>Cliente</th><th class="hide-sm">Zonas</th><th class="hide-sm">Máx. financiar</th><th>Fase</th><th>Seguimiento</th><th class="hide-sm">Enlaces</th>${S.role==="revisor"?'<th class="hide-sm">Colaboradora</th>':""}
+    </tr></thead><tbody>${L.map(l => { const sg = seguimiento(l); return `<tr class="click" data-open="${l.id}">
+      <td><b>${esc(l.nombre)}</b><div class="small muted mono">${esc(l.telefono)}</div></td>
+      <td class="hide-sm">${esc(l.zonas || "—")}</td><td class="hide-sm mono">${eur(l.maxFinanciar)}</td>
+      <td><span class="chip ${FASES[l.fase]?.c}">${FASES[l.fase]?.t}</span></td>
+      <td>${sg ? `<span class="chip ${sg.c}">${esc(sg.t)}</span>` : "—"}</td>
+      <td class="hide-sm mono">${(l.enlaces||[]).length}</td>${S.role==="revisor"?`<td class="hide-sm small">${esc(nombreDe(l.ownerEmail))}</td>`:""}
+    </tr>`; }).join("")}</tbody></table></div></div>` : `<div class="empty">${S.leads.length ? "Ningún lead coincide con este filtro." : "Aún no hay leads. Crea la ficha de un cliente con «+ Nuevo lead» cuando lo cojas del CRM."}</div>`}`;
+  },
+
+  revision() {
+    const colabs = S.acceso?.colaboradoras || [];
+    const mes = hoy().slice(0,7), semana = addDays(hoy(), -6);
+    const enl = S.leads.flatMap(l => (l.enlaces||[]).map(e => ({l, e})));
+    const enlMes = enl.filter(x => (x.e.fecha||"").startsWith(mes)).length;
+    const enlSem = enl.filter(x => (x.e.fecha||"") >= semana).length;
+    const reservas = enl.filter(x => x.e.estado === "reserva");
+    const pendVal = reservas.filter(x => !x.l.comisiones?.[x.e.id]).length;
+    const porPagar = reservas.filter(x => x.l.comisiones?.[x.e.id]?.estado === "validada").length;
+    const dias = Array.from({length:14}, (_,i) => addDays(hoy(), i - 13));
+    return `
+    <div class="page-head"><div><h1 style="font-size:1.7rem">Revisión</h1><p>Progreso de las colaboradoras y comisiones por vivienda.</p></div></div>
+    <div class="tiles">
+      <div class="tile"><span class="label">Leads activos</span><b>${activos(S.leads).length}</b></div>
+      <div class="tile"><span class="label">Enlaces este mes</span><b>${enlMes}<span class="muted" style="font-size:.9rem"> / 30</span></b></div>
+      <div class="tile"><span class="label">Enlaces 7 días</span><b>${enlSem}</b></div>
+      <div class="tile"><span class="label">Comisión por pagar</span><b>${eur(porPagar*25)}</b><span class="small muted">${pendVal} reserva(s) por validar</span></div>
+    </div>
+    <div class="grid2">
+      <section class="panel">
+        <div class="panel-head"><h2>Comisiones (25 € por vivienda)</h2></div>
+        <p class="small muted" style="margin-top:-6px">Aparecen las viviendas marcadas como «Quiere reservar». Valida solo cuando el cliente haya firmado el documento de reserva o arras.</p>
+        ${reservas.length ? reservas.map(({l,e}) => { const c = l.comisiones?.[e.id]; return `
+          <div class="link-item"><div class="link-top"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(portal(e.url))} · ${esc(l.nombre)}</a>
+            ${c ? `<span class="chip ${c.estado==="pagada"?"ok":c.estado==="validada"?"acc":"bad"}">${{validada:"Validada",pagada:"Pagada",rechazada:"No cuenta"}[c.estado]}</span>` : `<span class="chip warn">Por validar</span>`}</div>
+            <div class="small muted" style="margin:4px 0 8px">${esc(nombreDe(l.ownerEmail))} · enviado el ${fmtFecha(e.fecha)}${c?.fecha ? ` · ${c.estado} el ${fmtFecha(c.fecha)}` : ""}</div>
+            <div class="toggles">
+              ${!c || c.estado==="rechazada" ? `<button class="btn sm" data-com="validada" data-l="${l.id}" data-e="${e.id}">Validar</button>` : ""}
+              ${c?.estado==="validada" ? `<button class="btn sm primary" data-com="pagada" data-l="${l.id}" data-e="${e.id}">Marcar pagada</button>` : ""}
+              ${!c ? `<button class="btn sm ghost" data-com="rechazada" data-l="${l.id}" data-e="${e.id}">No cuenta</button>` : ""}
+              <button class="btn sm ghost" data-open="${l.id}">Ver ficha</button>
+            </div></div>`; }).join("") : `<div class="empty">Todavía no hay viviendas con reserva.</div>`}
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Checklist · últimos 14 días</h2></div>
+        ${colabs.length ? colabs.map(em => { const ck = S.checklists[em] || {}; return `
+          <div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b>${esc(nombreDe(em))}</b><span class="small muted">${activos(S.leads.filter(l=>l.ownerEmail===em)).length} leads activos</span></div>
+          <div class="heat">${dias.map(d => { const h = ck[d] || {}; const n = ITEMS.filter(i => h[i.k]).length; const lvl = n === 0 ? "" : n < 5 ? "h1" : n < ITEMS.length ? "h2" : "h3"; return `<div class="${lvl}" title="${fmtFecha(d)}: ${n}/${ITEMS.length}">${Number(d.slice(8))}</div>`; }).join("")}</div></div>`; }).join("") + `<p class="small muted">Verde intenso: checklist completa. Amarillo: menos de la mitad.</p>` : `<div class="empty">Añade a las colaboradoras en <a href="#accesos">Accesos</a>.</div>`}
+      </section>
+    </div>`;
+  },
+
+  accesos() {
+    const a = S.acceso || {revisores:[], colaboradoras:[], nombres:{}};
+    const item = (em, tipo) => `<div class="acc-item"><span><b>${esc(nombreDe(em))}</b> <span class="small muted">${esc(em)}</span></span><button class="btn sm ghost danger" data-del="${tipo}" data-em="${esc(em)}">Quitar</button></div>`;
+    return `
+    <div class="page-head"><div><h1 style="font-size:1.7rem">Accesos</h1><p>Quién puede entrar. Se entra con la cuenta de Google de cada persona.</p></div></div>
+    <div class="grid2">
+      <section class="panel"><h2>Colaboradoras</h2><p class="small muted">Ven solo sus propios leads y su checklist.</p>
+        <div class="acc-list">${(a.colaboradoras||[]).map(e => item(e,"colaboradoras")).join("") || `<div class="empty">Nadie todavía.</div>`}</div>
+        <form class="inline-form" data-form="colaboradoras"><input name="nombre" placeholder="Nombre" required><input name="email" type="email" placeholder="correo@gmail.com" required><button class="btn primary">Añadir</button></form>
+      </section>
+      <section class="panel"><h2>Revisión</h2><p class="small muted">Ven todos los leads, las checklists y validan comisiones.</p>
+        <div class="acc-list">${ADMIN_EMAIL ? `<div class="acc-item"><span><b>Administradora</b> <span class="small muted">${esc(ADMIN_EMAIL)}</span></span></div>` : ""}${(a.revisores||[]).map(e => item(e,"revisores")).join("")}</div>
+        <form class="inline-form" data-form="revisores"><input name="nombre" placeholder="Nombre" required><input name="email" type="email" placeholder="correo@gmail.com" required><button class="btn primary">Añadir</button></form>
+      </section>
+    </div>`;
+  },
+
+  ayuda() {
+    return `<div class="page-head"><div><h1 style="font-size:1.7rem">Ayuda</h1><p>Cómo trabajamos en Tu Hogar Posible.</p></div></div>
+    <div class="help">
+      <section><h3>Tu trabajo en una frase</h3><p>Encontrar viviendas en venta que encajen de verdad con lo que busca cada cliente, enviárselas y acompañarle hasta que quiera reservar una. En ese momento le pasas a Albert o a Paula.</p></section>
+      <section><h3>El circuito de un lead</h3><ol>
+        <li><b>Coges el lead del CRM</b> (columna «Buscando Vivienda») y creas su ficha aquí con «+ Nuevo lead».</li>
+        <li><b>Agendas una videollamada</b> por Spoki y la apuntas en la pestaña «Videollamada» de la ficha.</li>
+        <li><b>En la videollamada</b> sigues el guion y rellenas zonas, máximo a financiar, habitaciones y características.</li>
+        <li><b>Buscas y envías enlaces</b> por Spoki (solo el enlace). Cada enlace lo apuntas en la pestaña «Enlaces».</li>
+        <li><b>El cliente llama al anunciante y va solo a verla.</b> Después le preguntas qué le ha parecido y actualizas el estado del enlace.</li>
+        <li><b>Si quiere reservar</b>, marcas el enlace como «Quiere reservar» y avisas a Albert o a Paula. Ellos siguen desde ahí.</li>
+      </ol></section>
+      <section><h3>Seguimiento y mensajes</h3><ul>
+        <li>Cada vez que un cliente conteste, pulsa <b>«Ha respondido»</b> en su ficha. Así se reinician los plazos.</li>
+        <li><b>2 días sin respuesta:</b> mensaje de reactivación.</li>
+        <li><b>4 días sin respuesta:</b> mensaje de ultimátum.</li>
+        <li><b>24 h sin responder al ultimátum:</b> revisa el historial y, si no se puede reconducir, elimina el lead del CRM y cierra la ficha.</li>
+        <li>Después de enviar un enlace: pregunta a las 24–48 h, otra vez después de la visita, y repasa todo en una videollamada semanal.</li>
+      </ul></section>
+      <section><h3>Cuándo eliminar un lead del CRM</h3><ul>
+        <li>No ha contestado a varios mensajes en días distintos.</li>
+        <li>Muestra rechazo abiertamente y no se puede reconducir.</li>
+        <li>No responde en 24 h después del mensaje de ultimátum.</li>
+      </ul><p><b>Usa siempre el criterio: cada lead cuesta dinero.</b> Antes de eliminar, lee el historial por si hay forma de retomarlo. La opción «Descalificar» del CRM no la usas tú.</p></section>
+      <section><h3>Comisión de 25 € por vivienda</h3><p>Cuenta cuando se cumplen las cuatro condiciones:</p><ol>
+        <li>La vivienda la has encontrado y enviado tú (y está apuntada en «Enlaces»).</li>
+        <li>Encaja razonablemente con lo que busca el cliente.</li>
+        <li>El cliente quiere reservarla de verdad.</li>
+        <li>Firma el documento de reserva o arras.</li>
+      </ol><p>Enviar un enlace o que el cliente vaya a verla no basta. Albert o Paula validan la comisión cuando hay firma.</p></section>
+      <section><h3>Dónde buscar</h3><p>Principalmente <b>Idealista</b> y <b>Vox Houses</b>, y cualquier otro portal que te funcione. Guarda alertas con los filtros de cada cliente para no repetir búsquedas.</p></section>
+      <section><h3>Horario de referencia</h3><p>De 11:00 a 14:00 y a partir de las 18:00 (hora peninsular española). Son las franjas en las que los clientes suelen estar disponibles.</p></section>
+      <section><h3>Confidencialidad</h3><ul>
+        <li>Los datos de los clientes (teléfono, presupuesto, situación) solo se usan para buscarles vivienda.</li>
+        <li>No los compartas fuera de Spoki, el CRM y esta herramienta. Nada de capturas a terceros.</li>
+        <li>No guardes datos de clientes en tu móvil o en documentos personales.</li>
+      </ul></section>
+    </div>`;
+  }
+};
+
+const rowLead = l => { const sg = seguimiento(l); return `<button class="row" data-open="${l.id}"><span class="stripe ${sg?.c || ""}"></span><span class="grow"><b>${esc(l.nombre)}</b><span class="sub">${esc(sg?.t || FASES[l.fase].t)}${l.zonas ? " · " + esc(l.zonas) : ""}</span></span><span class="chip ${FASES[l.fase].c}">${FASES[l.fase].t}</span></button>`; };
+
+/* ============ FICHA (PANEL LATERAL) ============ */
+function openLead(id, tab) { S.open = id; S.tab = tab || "ficha"; S.closing = false; renderDrawer(); }
+function closeDrawer() { S.open = null; $("#drawer")?.remove(); $("#scrim")?.remove(); document.body.style.overflow = ""; }
+function renderDrawer() {
+  const l = S.open === "__new" ? null : lead(S.open);
+  $("#drawer")?.remove(); $("#scrim")?.remove();
+  if (S.open !== "__new" && !l) { S.open = null; return; }
+  document.body.style.overflow = "hidden";
+  const scrim = document.createElement("div"); scrim.className = "scrim"; scrim.id = "scrim"; scrim.dataset.a = "close";
+  const d = document.createElement("aside"); d.className = "drawer"; d.id = "drawer"; d.setAttribute("role","dialog"); d.setAttribute("aria-modal","true");
+  d.innerHTML = l ? drawerLead(l) : drawerNew();
+  document.body.append(scrim, d);
+}
+function drawerNew() {
+  return `<div class="d-head" style="padding-bottom:14px"><div class="d-title"><h2>Nuevo lead</h2><button class="btn ghost sm" data-a="close" aria-label="Cerrar">✕</button></div></div>
+  <div class="d-body"><form data-form="new" class="form">
+    <div class="field full"><label for="n-nombre">Nombre del cliente</label><input id="n-nombre" name="nombre" required placeholder="Como aparece en el CRM"></div>
+    <div class="field"><label for="n-tel">Teléfono</label><input id="n-tel" name="telefono" required placeholder="+34 600 000 000"></div>
+    <div class="field"><label for="n-zonas">Zona o ciudad (si ya la sabes)</label><input id="n-zonas" name="zonas"></div>
+    <div class="full"><button class="btn primary">Crear ficha</button></div>
+  </form><p class="small muted">Crea la ficha cuando cojas el lead del CRM. El resto de datos los completarás en la videollamada.</p></div>`;
+}
+function drawerLead(l) {
+  const sg = seguimiento(l), n = (l.enlaces||[]).length;
+  return `<div class="d-head">
+    <div class="d-title"><h2>${esc(l.nombre)}</h2><button class="btn ghost sm" data-a="close" aria-label="Cerrar">✕</button></div>
+    <div class="d-meta"><span class="mono">${esc(l.telefono)}</span><button class="btn sm ghost" data-copy="${esc(l.telefono)}">Copiar</button>
+      <span class="chip ${FASES[l.fase].c}">${FASES[l.fase].t}</span>${S.role==="revisor" ? `<span class="small muted">· ${esc(nombreDe(l.ownerEmail))}</span>` : ""}</div>
+    <div class="d-tabs" role="tablist">${[["ficha","Ficha"],["enlaces",`Enlaces (${n})`],["llamada","Videollamada"]].map(([k,t]) => `<button role="tab" aria-selected="${S.tab===k}" data-tab="${k}">${t}</button>`).join("")}</div>
+  </div>
+  <div class="d-body">${sg ? followBox(l, sg) : ""}${{ficha:tabFicha, enlaces:tabEnlaces, llamada:tabLlamada}[S.tab](l)}</div>`;
+}
+function followBox(l, sg) {
+  return `<div class="follow ${sg.c === "bad" ? "bad" : sg.c === "warn" ? "warn" : ""}">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${esc(sg.t)}</b>${l.reactivacion ? `<span class="small muted">Reactivación: ${fmtFecha(l.reactivacion)}</span>` : ""}</div>
+    ${sg.a ? `<div class="small" style="margin-top:4px">${esc(sg.a)}</div>` : ""}
+    <div class="actions">
+      <button class="btn sm primary" data-act="respondio">Ha respondido</button>
+      ${sg.k === "reactivar" ? `<button class="btn sm" data-act="reactivacion">Reactivación enviada</button>` : ""}
+      ${sg.k === "ultimatum" || sg.k === "reactivar" || (sg.k === "espera" && !l.ultimatum) ? `<button class="btn sm" data-act="ultimatum">Ultimátum enviado</button>` : ""}
+      ${sg.k === "eliminar" ? `<button class="btn sm danger" data-act="cerrar">Cerrar ficha</button>` : ""}
+    </div></div>`;
+}
+const fld = (l, k, t, type="text", extra="") => `<div class="field ${extra}"><label for="f-${k}">${t}</label><input id="f-${k}" type="${type}" data-f="${k}" value="${esc(l[k] ?? "")}"></div>`;
+function necesidades(l) {
+  return `${fld(l,"zonas","Zonas que le interesan","text","full")}
+    ${fld(l,"maxFinanciar","Máximo a financiar (€)","number")}
+    <div class="field"><label for="f-habitaciones">Habitaciones</label><select id="f-habitaciones" data-f="habitaciones">${["","1","2","3","4","5 o más"].map(v => `<option value="${v}" ${l.habitaciones===v?"selected":""}>${v || "Sin indicar"}</option>`).join("")}</select></div>
+    <div class="field full"><label>Características deseadas</label><div class="extras">${EXTRAS.map(x => `<label><input type="checkbox" data-extra="${x}" ${(l.extras||[]).includes(x)?"checked":""}>${x}</label>`).join("")}</div></div>
+    <div class="field full"><label for="f-otros">Otras características o imprescindibles</label><textarea id="f-otros" data-f="otros" placeholder="Ej.: planta alta, cerca del colegio, admite mascotas…">${esc(l.otros || "")}</textarea></div>`;
+}
+function tabFicha(l) {
+  return `<div class="form">
+    ${fld(l,"nombre","Nombre")}${fld(l,"telefono","Teléfono")}
+    ${necesidades(l)}
+    <div class="field full"><label for="f-notas">Notas</label><textarea id="f-notas" data-f="notas">${esc(l.notas || "")}</textarea></div>
+    <div class="field"><label for="f-fase">Fase</label><select id="f-fase" data-f="fase">${Object.entries(FASES).map(([k,f]) => `<option value="${k}" ${l.fase===k?"selected":""}>${f.t}</option>`).join("")}</select></div>
+    <div class="field"><label>Creado</label><input value="${fmtFecha(l.creado)}" disabled></div>
+  </div>
+  ${l.fase === "cerrado" ? `<p class="small muted" style="margin-top:14px">Cerrado: ${esc(MOTIVOS[l.motivoCierre] || "")}</p>` : S.closing ? closeConfirm() : `<div style="margin-top:18px"><button class="btn danger sm" data-act="cerrar">Cerrar ficha</button></div>`}`;
+}
+function closeConfirm() {
+  return `<div class="confirm"><b>Cerrar esta ficha</b><p class="small" style="margin:4px 0 10px">La ficha se guarda como cerrada y deja de aparecer en tus tareas. Recuerda eliminar también el lead en el CRM si corresponde.</p>
+    <div class="field"><label for="motivo">Motivo</label><select id="motivo">${Object.entries(MOTIVOS).map(([k,t]) => `<option value="${k}">${t}</option>`).join("")}</select></div>
+    <div class="toggles" style="margin-top:10px"><button class="btn sm danger" data-act="cerrar-ok">Cerrar ficha</button><button class="btn sm ghost" data-act="cerrar-no">Cancelar</button></div></div>`;
+}
+function tabEnlaces(l) {
+  const E = [...(l.enlaces||[])].sort((a,b) => (b.fecha||"").localeCompare(a.fecha||""));
+  return `<form class="addlink" data-form="link"><input name="url" type="url" required placeholder="Pega el enlace de la vivienda (Idealista, Vox Houses…)"><button class="btn primary">Añadir</button></form>
+  ${E.length ? E.map(e => { const c = l.comisiones?.[e.id]; return `<div class="link-item">
+    <div class="link-top"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(portal(e.url))}</a><span class="small muted">${fmtFecha(e.fecha)}</span>
+      <select data-estado="${e.id}" aria-label="Estado del enlace">${Object.entries(ESTADOS_ENLACE).map(([k,t]) => `<option value="${k}" ${e.estado===k?"selected":""}>${t}</option>`).join("")}</select></div>
+    <div class="small muted" style="margin-top:4px;overflow-wrap:anywhere">${esc(e.url)}</div>
+    ${c ? `<div style="margin-top:6px"><span class="chip ${c.estado==="pagada"?"ok":c.estado==="validada"?"acc":"bad"}">Comisión ${({validada:"validada",pagada:"pagada",rechazada:"no válida"})[c.estado]}</span></div>` : e.estado === "reserva" ? `<div style="margin-top:6px"><span class="chip warn">Comisión pendiente de validar</span></div>` : ""}
+    <div style="margin-top:6px"><button class="btn sm ghost danger" data-dellink="${e.id}">Quitar</button></div>
+  </div>`; }).join("") : `<div class="empty">Aún no has enviado viviendas a este cliente.</div>`}`;
+}
+function tabLlamada(l) {
+  const c = l.llamada || {};
+  return `<div class="panel" style="margin-bottom:16px"><h3 style="margin-bottom:10px">Cita</h3>
+    <div class="form"><div class="field"><label for="c-fecha">Fecha</label><input id="c-fecha" type="date" data-c="fecha" value="${esc(c.fecha||"")}"></div>
+    <div class="field"><label for="c-hora">Hora</label><input id="c-hora" type="time" data-c="hora" value="${esc(c.hora||"")}"></div></div>
+    <div class="toggles" style="margin-top:12px">
+      <label class="toggle"><input type="checkbox" data-cb="recordatorio" ${c.recordatorio?"checked":""}>Recordatorio enviado</label>
+      <label class="toggle"><input type="checkbox" data-cb="confirmada" ${c.confirmada?"checked":""}>Confirmada</label>
+      <label class="toggle"><input type="checkbox" data-cb="realizada" ${c.realizada?"checked":""}>Realizada</label>
+    </div></div>
+  <div class="panel"><h3 style="margin-bottom:6px">Guion de la videollamada</h3>
+    <div class="script-step"><div class="step-n">1</div><div><b>Presentación y propósito</b>
+      <p class="say">«Hola, soy ${esc((S.role==="colab" ? S.nombre : nombreDe(l.ownerEmail)).split(" ")[0])}, de Tu Hogar Posible. El objetivo de esta llamada es entender bien lo que necesitas para encontrarte opciones de vivienda que encajen contigo.»</p></div></div>
+    <div class="script-step"><div class="step-n">2</div><div><b>Entender sus necesidades</b><p class="small muted" style="margin:4px 0 10px">Ve rellenando mientras habla. Se guarda solo.</p><div class="form">${necesidades(l)}</div></div></div>
+    <div class="script-step"><div class="step-n">3</div><div><b>Cómo seguimos</b>
+      <p class="say">«Te iré enviando enlaces por WhatsApp. Si alguno te interesa, llama directamente al anunciante y ve a verlo. Después me cuentas qué te ha parecido y así afino la búsqueda.»</p></div></div>
+    <div class="script-step"><div class="step-n">4</div><div><b>Cierre</b><p class="small" style="margin:4px 0 10px">Resume lo apuntado para confirmar que está bien.</p>
+      ${c.realizada ? `<span class="chip ok">Llamada realizada</span>` : `<button class="btn primary" data-act="llamada-ok">Llamada realizada · pasar a búsqueda</button>`}</div></div>
+  </div>`;
+}
+
+/* ============ EVENTOS ============ */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-a],[data-open],[data-filtro],[data-tab],[data-act],[data-copy],[data-com],[data-del],[data-dellink]");
+  if (!t) return;
+  const ds = t.dataset;
+  if (ds.a === "login") return login();
+  if (ds.a === "logout") return logout();
+  if (ds.a === "close") return closeDrawer();
+  if (ds.a === "new") { S.open = "__new"; return renderDrawer(); }
+  if (ds.open) return openLead(ds.open);
+  if (ds.filtro) { S.filtro = ds.filtro; if (S.view !== "leads") location.hash = "leads"; else render(); return; }
+  if (ds.tab) { S.tab = ds.tab; S.closing = false; return renderDrawer(); }
+  if (ds.copy) { navigator.clipboard?.writeText(ds.copy).then(() => toast("Teléfono copiado")).catch(() => {}); return; }
+  if (ds.com) { const l = lead(ds.l); if (l) setComision(l, ds.e, {estado:ds.com, fecha:hoy(), por:S.email}); return; }
+  if (ds.del) { const a = structuredClone(S.acceso); a[ds.del] = (a[ds.del]||[]).filter(x => x !== ds.em); return saveAcceso(a, "Acceso quitado"); }
+  if (ds.dellink) { const l = lead(S.open); l.enlaces = (l.enlaces||[]).filter(x => x.id !== ds.dellink); saveLead(l, "Enlace quitado"); return renderDrawer(); }
+  if (ds.act) {
+    const l = lead(S.open); if (!l) return;
+    const now = new Date().toISOString();
+    switch (ds.act) {
+      case "respondio": l.ultimaRespuesta = hoy(); l.reactivacion = null; l.ultimatum = null; saveLead(l, "Anotado: ha respondido"); break;
+      case "reactivacion": l.reactivacion = hoy(); saveLead(l, "Reactivación anotada"); break;
+      case "ultimatum": l.ultimatum = now; saveLead(l, "Ultimátum anotado"); break;
+      case "cerrar": S.tab = "ficha"; S.closing = true; break;
+      case "cerrar-no": S.closing = false; break;
+      case "cerrar-ok": l.fase = "cerrado"; l.motivoCierre = $("#motivo").value; S.closing = false; saveLead(l, "Ficha cerrada"); break;
+      case "llamada-ok": l.llamada = {...(l.llamada||{}), realizada:true}; if (l.fase === "nuevo" || l.fase === "videollamada") l.fase = "buscando"; l.ultimaRespuesta = hoy(); saveLead(l, "Llamada realizada"); break;
+    }
+    renderDrawer(); render();
+  }
+});
+
+document.addEventListener("change", e => {
+  const t = e.target, ds = t.dataset;
+  if (ds.ck) return setHecho(ds.ck, t.checked);
+  if (t.id === "colab") { S.colab = t.value; return render(); }
+  const l = lead(S.open); if (!l) return;
+  if (ds.f) {
+    let v = t.value; if (ds.f === "maxFinanciar") v = v === "" ? "" : Number(v);
+    l[ds.f] = v; saveLead(l, "Guardado");
+    if (ds.f === "fase") renderDrawer();
+    render();
+  } else if (ds.extra) {
+    const s = new Set(l.extras || []); t.checked ? s.add(ds.extra) : s.delete(ds.extra); l.extras = [...s]; saveLead(l, "Guardado");
+  } else if (ds.c || ds.cb) {
+    l.llamada = {...(l.llamada || {})};
+    if (ds.c) l.llamada[ds.c] = t.value; else l.llamada[ds.cb] = t.checked;
+    if (ds.c === "fecha" && t.value && l.fase === "nuevo") l.fase = "videollamada";
+    saveLead(l, "Guardado"); render();
+  } else if (ds.estado) {
+    const en = (l.enlaces || []).find(x => x.id === ds.estado); if (!en) return;
+    en.estado = t.value;
+    if (t.value === "reserva" && l.fase !== "cerrado") { l.fase = "reserva"; toast("Avisa a Albert o a Paula: el cliente quiere reservar"); saveLead(l); }
+    else saveLead(l, "Estado actualizado");
+    renderDrawer(); render();
+  }
+});
+
+document.addEventListener("input", e => { if (e.target.id === "q") { S.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#q"); q.focus(); q.setSelectionRange(pos, pos); } });
+
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target, kind = f.dataset.form, fd = Object.fromEntries(new FormData(f));
+  if (kind === "new") {
+    const l = {id:uid(), ownerEmail:S.email, nombre:fd.nombre.trim(), telefono:fd.telefono.trim(), zonas:(fd.zonas||"").trim(), maxFinanciar:"", habitaciones:"", extras:[], otros:"", notas:"",
+      fase:"nuevo", ultimaRespuesta:hoy(), reactivacion:null, ultimatum:null, llamada:null, enlaces:[], comisiones:{}, creado:new Date().toISOString()};
+    saveLead(l, "Ficha creada"); openLead(l.id, "llamada"); render();
+  } else if (kind === "link") {
+    const l = lead(S.open); if (!l) return;
+    l.enlaces = [...(l.enlaces||[]), {id:uid(), url:fd.url.trim(), fecha:hoy(), estado:"enviado"}];
+    if (l.fase === "nuevo" || l.fase === "videollamada") l.fase = "buscando";
+    saveLead(l, "Enlace añadido"); renderDrawer(); render();
+  } else if (kind === "colaboradoras" || kind === "revisores") {
+    const em = fd.email.trim().toLowerCase(); const a = structuredClone(S.acceso || {revisores:[], colaboradoras:[], nombres:{}});
+    a[kind] = [...new Set([...(a[kind]||[]), em])]; a.nombres = {...(a.nombres||{}), [em]: fd.nombre.trim()};
+    if (!a.revisores) a.revisores = []; if (!a.colaboradoras) a.colaboradoras = [];
+    saveAcceso(a, "Acceso añadido");
+  }
+});
+
+document.addEventListener("keydown", e => { if (e.key === "Escape" && S.open) closeDrawer(); });
+window.addEventListener("hashchange", () => { S.view = location.hash.slice(1) || (S.role === "revisor" ? "revision" : "hoy"); closeDrawer(); render(); window.scrollTo(0,0); });
+
+S.view = location.hash.slice(1) || "hoy";
+render();
+if (FIREBASE_CONFIG) initFirebase().catch(e => { S.ready = true; S.error = "No se ha podido conectar con Firebase."; render(); });
+</script>
+</body>
+</html>
